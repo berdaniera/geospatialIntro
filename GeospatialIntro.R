@@ -135,8 +135,7 @@ forval <- -coef(fmod)[1]/coef(fmod)[2] # 50% probability
 abline(v=forval, lwd=5, col="#001A57")
 
 
-# f. contours
-
+# f. Predictive contours
 # transformed to US National Atlas Equal Area
 cooplot <- spTransform(coo,CRS("+init=epsg:2163"))
 defplot <- projectRaster(defpr,crs="+init=epsg:2163")
@@ -155,3 +154,8 @@ m <- leaflet() %>% addTiles() # PIPES
 m %>% addRasterImage(defpro2,opacity=0.5)
 leaflet(cornerso) %>% addTiles() %>% addPolygons()
 
+
+#################
+# FUTURE
+# HDF
+# Lidar
