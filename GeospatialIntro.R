@@ -100,6 +100,8 @@ plot(defpr, main="Climatic water deficit (PET - AET)", col=terrain.colors(255))
 # a. Crop and mask raster
 defcrop <- crop(defpr,extent(cornerso))
 defmask <- mask(defcrop,cornerso)
+# Write the raster
+writeRaster(defmask,"FourCornersDeficit.tif",format="GTiff")
 
 # b. Rasterize points
 cooras <- rasterize(coo,defpr,
