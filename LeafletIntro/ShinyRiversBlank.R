@@ -4,6 +4,30 @@ require(lubridate)
 require(shiny)
 require(sp)
 
+################################
+# Today's agenda:
+
+# 0. Leaflet introduction (5-10 minutes)
+
+# 1.  a. Create states dropdown menu in sidebar UI
+#     b. Create leaflet map output in Server
+#     c. Add leaflet map in main panel UI with state sites as markers
+#     bonus: Make the map pretty, set its initial zoom and tiles, modify points on map
+# (15-20 minutes)
+
+# - REGROUP (5-10 minutes)
+
+# 2.  a. Create variable options in sidebar UI
+#     b. Read ID of clicked point from leaflet input in Server data query
+#     c. Return output data in plots or summary tables
+#     bonus: accept multiple variables and plot them differently
+#     double bonus: accept multiple sites based on map zoom extent
+# (15-20 minutes)
+
+# - REGROUP (5-10 minutes)
+
+
+################################
 # Functions
 getUSGSsites <- function(state){
   url <- paste0("http://waterservices.usgs.gov/nwis/iv/?period=PT1H&stateCd=",state,"&parameterCd=00060&format=json&siteStatus=active")
