@@ -19,10 +19,10 @@ getUSGSsites <- function(state){
 }
 getUSGSdata <- function(days,vars,site,bounds){
   period <- paste0("P",days,"D")
-  param <- paste(as.character(vars),sep=",")
+  param <- paste(unlist(vars),collapse=",")
   if(!is.null(site)) url <- paste0("http://waterservices.usgs.gov/nwis/iv/?period=",period,"&sites=",site,"&parameterCd=",param,"&format=json")
   else url <- paste0("http://waterservices.usgs.gov/nwis/iv/?period=",period,"&bBox=",bounds,"&parameterCd=",param,"&format=json")
-#  print(url)
+  print(url)
   dat <- jsonlite::fromJSON(url)
   list(data=dat$value$timeSeries$values[[1]]$value[[1]], 
        site=dat$value$timeSeries$sourceInfo$siteName[1]
@@ -40,21 +40,30 @@ ui <- fluidPage(sidebarLayout(
     # Dropdown: choose state
       # hint: see state.abb
     # checkboxes for variables:
-      # ("00060") Discharge, cubic feet per second
-      # ("00070") Turbidity, water, unfiltered, Jackson Turbidity Units
-      # ("00400") pH, water, unfiltered, field, standard units
+      # "00060" Discharge, cubic feet per second
+      # "00065" Gage height, ft
+      # "00070" Turbidity, Jackson Turbidity Units
+      # "00010" Temperature, C
+      # "00095" Specific conductance, uS/cm
     # choose time scale slider number of days (1 to 30)
     # action button
     selectInput(inputId = "state",
                 label = "State:",
                 choices = state.abb,
-                selected = 33),
-    checkboxGroupInput("variables", label = h3("Variables:"), 
-                       choices = list("Discharge" = "00060", 
+                selected = "NC"),
+#     checkboxGroupInput("variables", label = h3("Variables:"), 
+#                        choices = list("Discharge" = "00060", 
+#                                       "Turbidity" = "00070", 
+#                                       "pH" = "00400"),
+#                         selected = 1),
+    radioButtons("variables", label = h3("Variables:"), 
+                       choices = list("Discharge, ft3/s" = "00060",
+                                      "Gage height, ft" = "00065",
+                                      "Temperature, C" = "00010",
                                       "Turbidity" = "00070", 
-                                      "pH" = "00400"),
-                        selected = 1),
-    #     checkboxInput(inputId = "discharge",label = "Discharge",value = TRUE),    
+                                      "Specific conductance, uS/cm" = "00095"),
+                       selected = "00065"),
+  #     checkboxInput(inputId = "discharge",label = "Discharge",value = TRUE),    
     #     checkboxInput(inputId = "turbidity",label = "Turbidity",value = FALSE),
     #     checkboxInput(inputId = "pH",label = "pH",value = FALSE),
     sliderInput("days", "Number of days back:",min=1, max=30, value=7),
@@ -77,7 +86,7 @@ ui <- fluidPage(sidebarLayout(
     p("4. Click 'View data'."),
     leafletOutput("leafmap"),
     plotOutput("plt"),
-    tableOutput("tab")
+    verbatimTextOutput("tab")
   )
 ))
 
@@ -118,8 +127,7 @@ server <- function(input, output) {
   # Output data summary
 
   
-  
-  dat <- eventReactive( input$state, getUSGSsite(tolower(input$state)) )
+  dat <- eventReactive( input$state, getUSGSsites(tolower(input$state)) )
   output$leafmap <- renderLeaflet({
     addCircleMarkers(m, data=dat()$sites, 
                      popup=dat()$codes$name, 
@@ -132,7 +140,7 @@ server <- function(input, output) {
     if(!is.null(input$leafmap_marker_click)) site <- as.character(input$leafmap_marker_click$id)
     else NULL
   })
-  mapbounds <- reactive(paste(rev(unlist( input$leafmap_bounds )),sep=","))
+  mapbounds <- reactive(paste(rev(unlist( input$leafmap_bounds )),collapse=","))
 
   obs <- eventReactive( input$getdat, getUSGSdata(input$days, input$variables, site(), mapbounds()) )  
 
@@ -142,12 +150,14 @@ server <- function(input, output) {
   output$plt <- renderPlot({
     values <- obs()$data$value
     dates <- getdates(obs()$data$dateTime)
-    plot(values~dates)
+    plot(values~dates,type="b",pch=19)
   })
-  output$tab <- renderTable({
-    summary(obs()$data$values)
+  output$tab <- renderPrint({
+    if(!is.na(obs())) print(summary(as.numeric(obs()$data$value)))
+    else print(NULL)
   })
   
 }
 
 shinyApp(ui = ui, server = server)
+

@@ -19,10 +19,10 @@ getUSGSsites <- function(state){
 }
 getUSGSdata <- function(days,vars,site,bounds){
   period <- paste0("P",days,"D")
-  param <- paste(as.character(vars),sep=",")
+  param <- paste(unlist(vars),collapse=",")
   if(!is.null(site)) url <- paste0("http://waterservices.usgs.gov/nwis/iv/?period=",period,"&sites=",site,"&parameterCd=",param,"&format=json")
   else url <- paste0("http://waterservices.usgs.gov/nwis/iv/?period=",period,"&bBox=",bounds,"&parameterCd=",param,"&format=json")
-#  print(url)
+  print(url)
   dat <- jsonlite::fromJSON(url)
   list(data=dat$value$timeSeries$values[[1]]$value[[1]], 
        site=dat$value$timeSeries$sourceInfo$siteName[1]
@@ -31,7 +31,7 @@ getUSGSdata <- function(days,vars,site,bounds){
 getdates <- function(date) ymd_hms(gsub("T", " ", substr(date,1,nchar(date)-6)))
 
 #### Create basemap
-m <- leaflet() %>% addTiles()
+  # m <- leaflet() %>% addTiles()
 
 ################################
 # Shiny
@@ -40,9 +40,11 @@ ui <- fluidPage(sidebarLayout(
     # Dropdown: choose state
       # hint: see state.abb
     # checkboxes for variables:
-      # ("00060") Discharge, cubic feet per second
-      # ("00070") Turbidity, water, unfiltered, Jackson Turbidity Units
-      # ("00400") pH, water, unfiltered, field, standard units
+      # "00060" Discharge, cubic feet per second
+      # "00065" Gage height, ft
+      # "00070" Turbidity, Jackson Turbidity Units
+      # "00010" Temperature, C
+      # "00095" Specific conductance, uS/cm
     # choose time scale slider number of days (1 to 30)
     # action button
   ),
@@ -98,3 +100,4 @@ server <- function(input, output) {
 }
 
 shinyApp(ui = ui, server = server)
+

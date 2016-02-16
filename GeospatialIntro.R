@@ -36,7 +36,7 @@ coo <- SpatialPoints(forestdat[,c("LON","LAT")], CRS("+init=epsg:4326"))
 coo
 
 par(mar=c(0,0,0,0))
-plot(coo,pch=".",col="#00000050")
+plot(coo,pch=".",col="#00000010")
 
 #################
 # 2. SHAPEFILES
@@ -60,8 +60,11 @@ cornerst
 
 cornerso <- unionSpatialPolygons(cornerst,IDs=rep(1,nrow(cornerst)))
 
+
 lines(cornerst,col="deeppink",lwd=2)
 lines(cornerso,lwd=2,lty=2)
+
+arizona <- cornerst[cornerst$NAME=="Arizona",]
 
 
 #################
@@ -75,14 +78,16 @@ download.file("http://www.cacpd.org.s3.amazonaws.com/water_bal_conus/AET_def_ann
               destfile="def_2000_2009.zip")
 unzip("def_2000_2009.zip", exdir="deficit")
 
-ff <- list.files("deficit", full.names=TRUE)
-def <- brick(ff) # why brick? single pointer file, smaller size, faster calculations
+ff <- list.files("deficit")
+def <- stack(paste0("deficit/",ff)) # why brick? single pointer file, smaller size, faster calculations
+def <- brick(def)
 defa <- aggregate(def, 12) # to 0.1 degrees, or 12x the original resolution
 
 # Do a calculation
 mndef <- stackApply(defa, rep(1,nlayers(def)), fun="mean")
 # reproject to match forest plots
 defpr <- projectRaster(mndef, crs=projection(coo))
+
 
 # How long does it take to plot?
 system.time(plot(mndef)) # slower
@@ -101,6 +106,7 @@ plot(defpr, main="Climatic water deficit (PET - AET)", col=terrain.colors(255))
 defcrop <- crop(defpr,extent(cornerso))
 defmask <- mask(defcrop,cornerso)
 # Write the raster
+
 writeRaster(defmask,"FourCornersDeficit.tif",format="GTiff")
 
 # b. Rasterize points
@@ -109,6 +115,8 @@ cooras <- rasterize(coo,defpr,
 cooras[is.na(cooras)] <- 0
 cooras[is.na(values(defpr))] <- NA
 
+plot(cooras)
+
 # c. Extract values at points
 defpoint <- extract(defpr, coo)
 dev.off()
@@ -116,7 +124,7 @@ hist(defpoint, freq=FALSE, col="#FF000050")
 hist(values(defpr),add=TRUE, freq=FALSE, col="#0000FF50")
 
 # d. Exclude points that are outside of four corners polygon
-wp <- over(coo, cornerso)
+wp <- over(coo,cornerso)
 coocor <- coo[which(wp==1),]
 plot(coo,pch=".",col="#00000010")
 points(coocor,col="#001A57",pch=".")
