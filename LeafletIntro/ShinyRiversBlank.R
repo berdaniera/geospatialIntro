@@ -39,7 +39,7 @@ ui <- fluidPage(sidebarLayout(
   sidebarPanel(
     # Dropdown: choose state
       # hint: see state.abb
-    # checkboxes for variables:
+    # Radio buttons for variables:
       # "00060" Discharge, cubic feet per second
       # "00065" Gage height, ft
       # "00070" Turbidity, Jackson Turbidity Units
