@@ -13,18 +13,18 @@ require(sp)
 #     b. Create leaflet map output in Server
 #     c. Add leaflet map in main panel UI with state sites as markers
 #     bonus: Make the map pretty, set its initial zoom and tiles, modify points on map
-# (15-20 minutes)
+# (15-25 minutes)
 
-# - REGROUP (5-10 minutes)
+# - REGROUP (5 minutes)
 
 # 2.  a. Create variable options in sidebar UI
 #     b. Read ID of clicked point from leaflet input in Server data query
 #     c. Return output data in plots or summary tables
-#     bonus: accept multiple variables and plot them differently
+#     bonus: accept multiple variables in sidebar UI and plot them differently
 #     double bonus: accept multiple sites based on map zoom extent
-# (15-20 minutes)
+# (15-25 minutes)
 
-# - REGROUP (5-10 minutes)
+# - REGROUP (5 minutes)
 
 
 ################################
